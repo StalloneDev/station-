@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 import { encrypt } from '@/lib/session'
 
 export async function login(formData: FormData) {
-    const user = formData.get('username') as string
+    const user = (formData.get('username') as string)?.trim()
     const pass = formData.get('password') as string
 
     if (!user || !pass) {
