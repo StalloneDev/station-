@@ -1,0 +1,358 @@
+[
+  [
+    "ETAT DES VENTES STATIONS DU 01 AVRIL 2026 ET STOCK"
+  ],
+  [
+    "S"
+  ],
+  [
+    "MRS AKPAKPA/JENN SERVICE",
+    "Volume vendu",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge du jour"
+  ],
+  [
+    "Essence",
+    1363,
+    3465,
+    5000,
+    7102,
+    7190
+  ],
+  [
+    "Gasoil",
+    893,
+    8460,
+    null,
+    7567,
+    7590
+  ],
+  [],
+  [
+    "MRS FIDJROSSE/JENN SERVICE",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence",
+    591,
+    5980,
+    null,
+    5389,
+    5385
+  ],
+  [
+    "Gasoil",
+    116,
+    4300,
+    null,
+    4184,
+    4190
+  ],
+  [],
+  [
+    "CORLAY FIDJROSSE/IMPERIAL GROUP",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence",
+    940,
+    11970,
+    null,
+    11030,
+    10970
+  ],
+  [
+    "Gasoil",
+    186,
+    11120,
+    null,
+    10934,
+    10890
+  ],
+  [],
+  [
+    "MRS STE RITA/ ISHOLA SERVICES ET FILS",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence",
+    1530,
+    10828,
+    null,
+    9298,
+    9323
+  ],
+  [
+    "Gasoil",
+    158,
+    214,
+    2000,
+    2056,
+    2056
+  ],
+  [],
+  [
+    "CORLAY VEDOKO/ GESTION DIRECTE",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence",
+    0,
+    2480,
+    null,
+    2480,
+    2480
+  ],
+  [
+    "Gasoil",
+    0,
+    300,
+    null,
+    300,
+    300
+  ],
+  [],
+  [
+    "CORLAY GODOMEY/AGICOP",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence",
+    355,
+    4345,
+    null,
+    3990,
+    3993
+  ],
+  [
+    "Gasoil",
+    914,
+    6758,
+    null,
+    5844,
+    5815
+  ],
+  [],
+  [
+    "MRS COCOTOMEY/ JENN SERVICES",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence ",
+    866,
+    4850,
+    null,
+    3984,
+    4010
+  ],
+  [
+    "Gasoil",
+    122,
+    2000,
+    null,
+    1878,
+    1910
+  ],
+  [],
+  [
+    "MRS PARAKOU 1/ JENN SERVICE",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence ",
+    867,
+    1020,
+    10000,
+    10153,
+    9950
+  ],
+  [
+    "Gasoil",
+    2144,
+    10470,
+    null,
+    8326,
+    8300
+  ],
+  [],
+  [
+    "MRS CALAVI KPOTA/ JENN SERVICE",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence ",
+    1270,
+    2843,
+    null,
+    1573,
+    1573
+  ],
+  [
+    "Gasoil",
+    180,
+    4800,
+    null,
+    4620,
+    4670
+  ],
+  [],
+  [
+    "MRS TANGUIETA/ ISHOLA SERVICE",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence ",
+    2829,
+    3780,
+    null,
+    951,
+    890
+  ],
+  [
+    "Gasoil",
+    2085,
+    8880,
+    null,
+    6795,
+    6910
+  ],
+  [],
+  [
+    "MRS OUIDAH/ GD",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence ",
+    0,
+    210,
+    null,
+    210,
+    210
+  ],
+  [
+    "Gasoil",
+    0,
+    185,
+    null,
+    185,
+    185
+  ],
+  [],
+  [
+    "MRS PARAKOU2/ KASAANF SARL",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence ",
+    48,
+    180,
+    null,
+    132,
+    140
+  ],
+  [
+    "Gasoil",
+    145,
+    580,
+    null,
+    435,
+    430
+  ],
+  [],
+  [
+    "CORLAY ARCONVILLE/SITRAC",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence",
+    0,
+    800,
+    null,
+    800,
+    800
+  ],
+  [
+    "Gasoil",
+    798,
+    6950,
+    null,
+    6152,
+    6110
+  ],
+  [],
+  [
+    "MRS DASSA/ ISHOLA SERVICE",
+    "Ventes",
+    "Stock Ouv",
+    "Réception",
+    "Stock Ferm",
+    "Jauge"
+  ],
+  [
+    "Essence ",
+    0,
+    430,
+    0,
+    430,
+    430
+  ],
+  [
+    "Gasoil",
+    0,
+    190,
+    0,
+    190,
+    190
+  ],
+  []
+]

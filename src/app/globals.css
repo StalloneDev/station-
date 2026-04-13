@@ -1,26 +1,123 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #09090b;
+  --foreground: #fafafa;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
+html, body {
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.glass-panel {
+  background: rgba(24, 24, 27, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-card {
+  background: linear-gradient(145deg, rgba(39, 39, 42, 0.4) 0%, rgba(24, 24, 27, 0.6) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.animated-gradient {
+  background: linear-gradient(-45deg, #3b82f6, #ec4899, #8b5cf6, #3b82f6);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.input-field {
+  width: 100%;
+  background-color: rgba(39, 39, 42, 0.6);
+  border: 1px solid rgba(63, 63, 70, 0.8);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #fafafa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.input-field::placeholder {
+  color: #52525b;
+}
+
+.input-field option {
+  background-color: #18181b;
+  color: #fafafa;
+}
+
+/* ─── RESPONSIVE LAYOUT ──────────────────────────────────────────────── */
+
+/* Desktop: sidebar + main side by side */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  margin-left: 256px; /* sidebar width */
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Show/hide based on screen size */
+.hidden-mobile { display: flex; flex-direction: column; }
+.mobile-header  { display: none !important; }
+
+@media (max-width: 768px) {
+  /* On mobile, sidebar is a drawer — not in flow */
+  .hidden-mobile  { display: none !important; }
+  .mobile-header  { display: flex !important; }
+
+  /* Remove the left margin reserved for the sidebar */
+  .app-layout {
+    margin-left: 0;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .app-main {
+    padding-top: 64px; /* height of the fixed mobile header */
+    overflow-y: visible;
+    min-height: 100vh;
+  }
+
+  /* Compress page padding */
+  .p-8 { padding: 1rem !important; }
+
+  /* Stack KPI grids to 2 columns max on mobile */
+  .lg\:grid-cols-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .lg\:grid-cols-3 { grid-template-columns: 1fr !important; }
+  .md\:grid-cols-3 { grid-template-columns: 1fr !important; }
+  .md\:grid-cols-2 { grid-template-columns: 1fr !important; }
+
+  /* Analyse tabs — wrap & smaller font */
+  .tab-row { flex-wrap: wrap; }
+
+  /* Table — allow horizontal scroll */
+  table { font-size: 11px; }
+  th, td { padding: 6px 8px !important; }
 }

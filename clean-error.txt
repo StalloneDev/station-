@@ -1,0 +1,15 @@
+[Sync Error] Name: PrismaClientConstructorValidationError
+Message: Unknown property datasourceUrl provided to PrismaClient constructor.
+Read more at https://pris.ly/d/client-constructor
+Stack: PrismaClientConstructorValidationError: Unknown property datasourceUrl provided to PrismaClient constructor.
+Read more at https://pris.ly/d/client-constructor
+    at jl (C:\Users\skoukpelou\Downloads\My Stations\gas-station-app\node_modules\@prisma\client\runtime\client.js:66:3832)
+    at new t (C:\Users\skoukpelou\Downloads\My Stations\gas-station-app\node_modules\@prisma\client\runtime\client.js:70:1808)
+    at Object.<anonymous> (C:\Users\skoukpelou\Downloads\My Stations\gas-station-app\scripts\test-prisma.js:4:18)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)

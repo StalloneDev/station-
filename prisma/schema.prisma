@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Station {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  dailyStates DailyState[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String   @unique // e.g., Essence, Gasoil
+  dailyStates DailyState[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model DailyState {
+  id          String   @id @default(uuid())
+  date        DateTime
+  
+  stationId   String
+  station     Station  @relation(fields: [stationId], references: [id])
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+
+  stockOuverture            Float
+  volumeVendu               Float
+  reception                 Float
+  stockTheoriqueFermeture   Float
+  jaugeDuJour               Float?
+  ecart                     Float?
+  tauxEcart                 Float?
+  
+  observation               String?
+  etatValidation            String    @default("brouillon") // brouillon, valide
+  flagAnomalie              Boolean   @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([date, stationId, productId])
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("manager") // admin, manager
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
