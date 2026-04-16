@@ -39,7 +39,7 @@ export default function LoginPage() {
             <Fuel size={32} color="white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">SIGA Dashboard</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">My Stations Dashboard</h1>
             <p className="text-zinc-400 text-sm mt-1">Connectez-vous pour accéder au système</p>
           </div>
         </div>
