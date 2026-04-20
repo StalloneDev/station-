@@ -66,7 +66,7 @@ export default function EtatsTable({ states }: { states: DailyState[] }) {
                 <td className={`px-4 py-3 text-right font-medium ${(s.ecart ?? 0) < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                   {s.ecart !== null ? s.ecart.toFixed(2) : '—'}
                 </td>
-                <td className={`px-4 py-3 text-right font-medium ${Math.abs(s.tauxEcart ?? 0) > 2 ? 'text-amber-400' : 'text-zinc-400'}`}>
+                <td className={`px-4 py-3 text-right font-medium ${Math.abs(s.tauxEcart ?? 0) > 0.5 ? 'text-amber-400' : 'text-zinc-400'}`}>
                   {s.tauxEcart !== null ? `${s.tauxEcart.toFixed(2)}%` : '—'}
                 </td>
                 <td className="px-4 py-3 text-center">

@@ -1,28 +1,50 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { login } from '@/lib/auth'
-import { Fuel, Lock, User } from 'lucide-react'
+import { getStations } from '@/lib/actions'
+import { Fuel, Lock, Building2 } from 'lucide-react'
+
+interface Station { id: string; name: string }
 
 export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [profile, setProfile] = useState<'admin' | 'manager'>('admin')
+  const [stations, setStations] = useState<Station[]>([])
   const router = useRouter()
+
+  useEffect(() => {
+    getStations().then(setStations)
+  }, [])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setError('')
-    
+
     const formData = new FormData(e.currentTarget)
+
+    // Username is determined by the profile selection, not typed by the user
+    const username = profile === 'admin' ? 'Administrateur' : 'Gestionnaire'
+    formData.set('username', username)
+
+    if (profile === 'admin') {
+      formData.delete('stationId')
+    }
+
     const res = await login(formData)
-    
+
     if (res?.error) {
       setError(res.error)
       setLoading(false)
     } else {
-      router.push('/')
+      if (res?.role === 'manager') {
+        router.push('/saisie')
+      } else {
+        router.push('/')
+      }
       router.refresh()
     }
   }
@@ -44,22 +66,54 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {/* Profile selector */}
+        <div className="flex rounded-xl border border-zinc-800 overflow-hidden mb-6">
+          <button
+            type="button"
+            onClick={() => setProfile('admin')}
+            className={`flex-1 py-2.5 text-sm font-medium transition-all ${
+              profile === 'admin'
+                ? 'bg-blue-600 text-white'
+                : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Administrateur
+          </button>
+          <button
+            type="button"
+            onClick={() => setProfile('manager')}
+            className={`flex-1 py-2.5 text-sm font-medium transition-all ${
+              profile === 'manager'
+                ? 'bg-blue-600 text-white'
+                : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Gestionnaire
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-zinc-300 ml-1">Utilisateur</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-zinc-500" />
+          {/* Station selector — only for managers */}
+          {profile === 'manager' && (
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-zinc-300 ml-1">Votre station</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Building2 className="h-5 w-5 text-zinc-500" />
+                </div>
+                <select
+                  name="stationId"
+                  required
+                  className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none"
+                >
+                  <option value="">-- Choisir votre station --</option>
+                  {stations.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
               </div>
-              <input
-                name="username"
-                type="text"
-                required
-                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-zinc-600"
-                placeholder="Nom d'utilisateur"
-              />
             </div>
-          </div>
+          )}
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-zinc-300 ml-1">Mot de passe</label>

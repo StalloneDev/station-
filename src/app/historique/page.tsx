@@ -3,53 +3,63 @@ import HistoriqueFilters from '@/components/HistoriqueFilters'
 import Link from 'next/link'
 
 interface Props {
-  searchParams: Promise<{ stationId?: string; limit?: string }>
+  searchParams: Promise<{ stationId?: string; startDate?: string; endDate?: string }>
 }
 
 export default async function HistoriquePage({ searchParams }: Props) {
   const params = await searchParams
   const stationId = params.stationId ?? ''
-  const limit = parseInt(params.limit ?? '10', 10)
-  const stations = await getStations()
 
   const today = new Date()
-  const dates: string[] = []
-  for (let i = 0; i < limit; i++) {
-    const d = new Date(today)
-    d.setDate(d.getDate() - i)
-    dates.push(d.toISOString().split('T')[0])
-  }
+  const todayStr = today.toISOString().split('T')[0]
 
-  const startDate = dates[dates.length - 1]
-  const endDate = dates[0]
-  const allStates = await getDailyStatesRange(startDate, endDate, stationId || undefined)
+  // Default: last 10 days
+  const defaultStart = new Date(today)
+  defaultStart.setDate(defaultStart.getDate() - 9)
+  const defaultStartStr = defaultStart.toISOString().split('T')[0]
 
-  const allDays = dates.map((d) => {
-    const targetStart = new Date(d)
-    targetStart.setHours(0, 0, 0, 0)
-    const targetEnd = new Date(d)
-    targetEnd.setHours(23, 59, 59, 999)
+  const startDate = params.startDate ?? defaultStartStr
+  const endDate = params.endDate ?? todayStr
 
-    const states = allStates.filter((s: any) => {
-      const sDate = typeof s.date === 'string' ? new Date(s.date) : s.date
-      return sDate >= targetStart && sDate <= targetEnd
-    })
+  const [allStates, stations] = await Promise.all([
+    getDailyStatesRange(startDate, endDate, stationId || undefined),
+    getStations(),
+  ])
 
-    return { date: d, states }
+  // Group states by date
+  const dateMap: Map<string, typeof allStates> = new Map()
+  allStates.forEach((s) => {
+    const dateKey = (typeof s.date === 'string' ? new Date(s.date) : s.date)
+      .toISOString().split('T')[0]
+    if (!dateMap.has(dateKey)) dateMap.set(dateKey, [])
+    dateMap.get(dateKey)!.push(s)
   })
+
+  // Sort dates descending
+  const sortedDates = Array.from(dateMap.keys()).sort((a, b) => b.localeCompare(a))
 
   return (
     <div className="p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-white">Historique</h1>
-        <p className="text-zinc-400 mt-1">Récapitulatif des 10 derniers jours</p>
+        <p className="text-zinc-400 mt-1">Récapitulatif des états par période</p>
       </div>
 
-      <HistoriqueFilters stations={stations} currentStation={stationId} />
+      <HistoriqueFilters
+        stations={stations}
+        currentStation={stationId}
+        currentStartDate={startDate}
+        currentEndDate={endDate}
+      />
 
       <div className="space-y-4">
-        {allDays.map(({ date, states }) => {
-          if (states.length === 0) return null
+        {sortedDates.length === 0 && (
+          <div className="glass-card rounded-2xl p-8 text-center text-zinc-500">
+            Aucun état trouvé pour cette période.
+          </div>
+        )}
+        {sortedDates.map((date) => {
+          const states = dateMap.get(date)!
           const totalVentes = states.reduce((s: number, r: any) => s + r.volumeVendu, 0)
           const anomalies = states.filter((r: any) => r.flagAnomalie).length
 
@@ -104,16 +114,6 @@ export default async function HistoriquePage({ searchParams }: Props) {
             </div>
           )
         })}
-      </div>
-
-      <div className="flex justify-center mt-6">
-        <Link 
-          href={`/historique?limit=${limit + 10}${stationId ? `&stationId=${stationId}` : ''}`}
-          scroll={false}
-          className="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2.5 rounded-xl transition-colors text-sm font-medium border border-zinc-700 shadow-sm flex items-center gap-2"
-        >
-          Charger les jours précédents
-        </Link>
       </div>
     </div>
   )

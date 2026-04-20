@@ -129,7 +129,7 @@ export async function saveDailyState(data: {
   const stockTheoriqueFermeture = data.stockOuverture + data.reception - data.volumeVendu
   const ecart = data.jaugeDuJour - stockTheoriqueFermeture
   const tauxEcart = stockTheoriqueFermeture > 0 ? (ecart / stockTheoriqueFermeture) * 100 : 0
-  const flagAnomalie = Math.abs(tauxEcart) > 2
+  const flagAnomalie = Math.abs(tauxEcart) > 0.5
 
   const stateDate = new Date(data.date)
   stateDate.setHours(12, 0, 0, 0)

@@ -9,10 +9,11 @@ interface Station { id: string; name: string }
 interface EtatsFiltersProps {
   stations: Station[]
   currentDate: string
+  currentEndDate: string
   currentStation: string
 }
 
-function EtatsFiltersInner({ stations, currentDate, currentStation }: EtatsFiltersProps) {
+function EtatsFiltersInner({ stations, currentDate, currentEndDate, currentStation }: EtatsFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -26,11 +27,18 @@ function EtatsFiltersInner({ stations, currentDate, currentStation }: EtatsFilte
   return (
     <div className="glass-card rounded-2xl p-4 flex items-center gap-4 flex-wrap">
       <Filter className="w-4 h-4 text-zinc-500 flex-shrink-0" />
-      <label className="text-sm text-zinc-400 font-medium flex-shrink-0">Date :</label>
+      <label className="text-sm text-zinc-400 font-medium flex-shrink-0">Du :</label>
       <input
         type="date"
         defaultValue={currentDate}
         onChange={(e) => update('date', e.target.value)}
+        className="input-field max-w-[180px]"
+      />
+      <label className="text-sm text-zinc-400 font-medium flex-shrink-0">Au :</label>
+      <input
+        type="date"
+        defaultValue={currentEndDate}
+        onChange={(e) => update('endDate', e.target.value)}
         className="input-field max-w-[180px]"
       />
       <label className="text-sm text-zinc-400 font-medium flex-shrink-0">Station :</label>

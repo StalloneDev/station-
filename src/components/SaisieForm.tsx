@@ -26,9 +26,10 @@ interface SaisieFormProps {
   products: Product[]
   initialStationId?: string
   onBack?: () => void
+  isManager?: boolean
 }
 
-export default function SaisieForm({ stations, products, initialStationId, onBack }: SaisieFormProps) {
+export default function SaisieForm({ stations, products, initialStationId, onBack, isManager }: SaisieFormProps) {
   const today = new Date().toISOString().split('T')[0]
   const [date, setDate] = useState(today)
   const [stationId, setStationId] = useState(initialStationId ?? stations[0]?.id ?? '')
@@ -46,7 +47,8 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
   const stockFermeture = stockOuverture + reception - volumeVendu
   const ecart = jaugeDuJour - stockFermeture
   const tauxEcart = stockFermeture > 0 ? (ecart / stockFermeture) * 100 : 0
-  const flagAnomalie = Math.abs(tauxEcart) > 2
+  // Anomaly threshold updated to 0.5%
+  const flagAnomalie = Math.abs(tauxEcart) > 0.5
 
   // Auto-load previous day's jauge as stock ouverture
   useEffect(() => {
@@ -76,6 +78,9 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
     })
   }
 
+  // Readonly class for manager fields that are locked
+  const readonlyCls = 'input-field bg-zinc-800/50 text-zinc-500 border-zinc-800 cursor-not-allowed opacity-70'
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
       {/* Selectors Row */}
@@ -101,7 +106,8 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="input-field"
+              readOnly={isManager}
+              className={isManager ? readonlyCls : 'input-field'}
             />
           </FormField>
           <FormField label="Station">
@@ -110,7 +116,8 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
               <select
                 value={stationId}
                 onChange={(e) => setStationId(e.target.value)}
-                className="input-field pl-10"
+                disabled={isManager}
+                className={isManager ? `${readonlyCls} pl-10` : 'input-field pl-10'}
               >
                 {stations.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
@@ -139,6 +146,7 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
       <div className="glass-card rounded-2xl p-6">
         <h2 className="font-semibold text-white mb-4">Valeurs à saisir</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Stock ouverture — always readonly (auto-computed) */}
           <FormField label="Stock d'ouverture (L)" hint={loadingJauge ? 'Chargement...' : 'Hérité de la jauge de la veille'}>
             <div className="relative">
               {loadingJauge && (
@@ -150,12 +158,14 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
                 step={0.01}
                 value={stockOuverture}
                 onChange={(e) => setStockOuverture(parseFloat(e.target.value) || 0)}
-                className="input-field bg-blue-500/5 border-blue-500/20"
+                readOnly={isManager}
+                className={isManager ? `${readonlyCls} border-blue-500/10` : 'input-field bg-blue-500/5 border-blue-500/20'}
               />
             </div>
           </FormField>
 
-          <FormField label="Volume vendu (L)" hint="Saisie manuelle obligatoire">
+          {/* Volume vendu — editable for everyone including managers */}
+          <FormField label="Volume Vendu de la veille (L)" hint="Saisie manuelle obligatoire">
             <input
               type="number"
               min={0}
@@ -167,7 +177,8 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
             />
           </FormField>
 
-          <FormField label="Réception (L)" hint="Laisser à 0 si pas de livraison">
+          {/* Réception — editable for everyone including managers */}
+          <FormField label="Réception de la Veille (L)" hint="Laisser à 0 si pas de livraison">
             <input
               type="number"
               min={0}
@@ -178,7 +189,8 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
             />
           </FormField>
 
-          <FormField label="Jauge du jour (L)" hint="Mesure physique de fin de journée — obligatoire">
+          {/* Jauge — editable for everyone including managers */}
+          <FormField label="Jauge au matin du jour actuelle (L)" hint="Mesure physique — obligatoire">
             <input
               type="number"
               min={0}
@@ -221,7 +233,7 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
         {flagAnomalie && (
           <div className="mt-4 flex items-start gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-sm text-amber-300">
             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <p>L'écart dépasse 2% du stock théorique. Un commentaire dans "Observations" est recommandé.</p>
+            <p>L'écart dépasse 0.5% du stock théorique. Un commentaire dans "Observations" est recommandé.</p>
           </div>
         )}
       </div>

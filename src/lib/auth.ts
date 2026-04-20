@@ -8,6 +8,7 @@ import { encrypt } from '@/lib/session'
 export async function login(formData: FormData) {
     const user = (formData.get('username') as string)?.trim()
     const pass = formData.get('password') as string
+    const stationId = (formData.get('stationId') as string)?.trim() || null
 
     if (!user || !pass) {
         return { error: 'Identifiants obligatoires' }
@@ -27,12 +28,18 @@ export async function login(formData: FormData) {
     }
 
     const role = dbUser.role
+
+    // If manager, a stationId is required
+    if (role === 'manager' && !stationId) {
+        return { error: 'Veuillez sélectionner votre station' }
+    }
+
     const expires = new Date(Date.now() + 10 * 60 * 60 * 1000)
-    const session = await encrypt({ user, role, expires })
+    const session = await encrypt({ user, role, stationId, expires })
 
     const cookieStore = await cookies()
     cookieStore.set('session', session, { expires, httpOnly: true, path: '/' })
-    return { success: true }
+    return { success: true, role }
 }
 
 export async function logout() {

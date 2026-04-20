@@ -7,20 +7,32 @@ import { Building2, ArrowRight } from 'lucide-react'
 interface Station { id: string; name: string }
 interface Product { id: string; name: string }
 
-export default function SaisieWrapper({ stations, products }: { stations: Station[], products: Product[] }) {
-  const [selectedStationId, setSelectedStationId] = useState<string | null>(null)
+interface SaisieWrapperProps {
+  stations: Station[]
+  products: Product[]
+  isManager?: boolean
+  managerStationId?: string | null
+}
 
+export default function SaisieWrapper({ stations, products, isManager, managerStationId }: SaisieWrapperProps) {
+  const [selectedStationId, setSelectedStationId] = useState<string | null>(
+    isManager && managerStationId ? managerStationId : null
+  )
+
+  // Managers go directly to their form without station selection
   if (selectedStationId) {
     return (
-      <SaisieForm 
-        stations={stations} 
-        products={products} 
-        initialStationId={selectedStationId} 
-        onBack={() => setSelectedStationId(null)}
+      <SaisieForm
+        stations={stations}
+        products={products}
+        initialStationId={selectedStationId}
+        onBack={isManager ? undefined : () => setSelectedStationId(null)}
+        isManager={isManager}
       />
     )
   }
 
+  // Admins see the station selection grid
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
       {stations.map(station => (
