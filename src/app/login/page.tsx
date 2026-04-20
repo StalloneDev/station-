@@ -26,8 +26,18 @@ export default function LoginPage() {
 
     const formData = new FormData(e.currentTarget)
 
-    // Username is determined by the profile selection, not typed by the user
-    const username = profile === 'admin' ? 'Administrateur' : 'Gestionnaire'
+    // Username is determined by the profile selection
+    let username = 'Administrateur'
+    if (profile === 'manager') {
+      const selectedStation = stations.find(s => s.id === formData.get('stationId'))
+      if (selectedStation) {
+        username = selectedStation.name
+      } else {
+        setError('Veuillez sélectionner une station valide.')
+        setLoading(false)
+        return
+      }
+    }
     formData.set('username', username)
 
     if (profile === 'admin') {
