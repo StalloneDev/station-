@@ -46,6 +46,15 @@ export async function GET(request: NextRequest) {
       `
     }).join('')
 
+    // Station totals
+    const stStockOuv = stateList.reduce((acc, s) => acc + s.stockOuverture, 0)
+    const stVolVen = stateList.reduce((acc, s) => acc + s.volumeVendu, 0)
+    const stRec = stateList.reduce((acc, s) => acc + s.reception, 0)
+    const stStockFer = stateList.reduce((acc, s) => acc + s.stockTheoriqueFermeture, 0)
+    const stJauge = stateList.reduce((acc, s) => acc + (s.jaugeDuJour ?? 0), 0)
+    const stEcart = stateList.reduce((acc, s) => acc + (s.ecart ?? 0), 0)
+    const stTaux = stStockFer > 0 ? (stEcart / stStockFer) * 100 : 0
+
     return `
       <div class="station-block">
         <h2 class="station-title">📍 Station : ${stationName}</h2>
@@ -66,6 +75,19 @@ export async function GET(request: NextRequest) {
             </tr>
           </thead>
           <tbody>${rows}</tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="2">TOTAL ${stationName}</td>
+              <td class="num">${formatNum(stStockOuv)}</td>
+              <td class="num">${formatNum(stVolVen)}</td>
+              <td class="num">${formatNum(stRec)}</td>
+              <td class="num">${formatNum(stStockFer)}</td>
+              <td class="num">${formatNum(stJauge)}</td>
+              <td class="num ${stEcart < 0 ? 'neg' : ''}">${formatNum(stEcart)}</td>
+              <td class="num">${stTaux.toFixed(2)}%</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     `
@@ -100,6 +122,7 @@ export async function GET(request: NextRequest) {
     .neg { color: #c62828; font-weight: 600; }
     .badge-anomaly { color: #e65100; font-weight: 700; }
     .badge-ok { color: #2e7d32; font-weight: 600; }
+    .total-row { background: #f8f9fa; font-weight: 800; border-top: 2px solid #dee2e6; }
     footer { margin-top: 24px; border-top: 1px solid #e0e0e0; padding-top: 10px; font-size: 10px; color: #888; text-align: center; }
     @media print {
       body { padding: 0; }

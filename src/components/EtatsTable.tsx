@@ -29,6 +29,17 @@ export default function EtatsTable({ states }: { states: DailyState[] }) {
     )
   }
 
+  // Calculate totals
+  const totalStockOuvert = states.reduce((s, r) => s + r.stockOuverture, 0)
+  const totalVendu = states.reduce((s, r) => s + r.volumeVendu, 0)
+  const totalRec = states.reduce((s, r) => s + r.reception, 0)
+  const totalStockFerm = states.reduce((s, r) => s + r.stockTheoriqueFermeture, 0)
+  const totalJauge = states.reduce((s, r) => s + (r.jaugeDuJour ?? 0), 0)
+  const totalEcart = states.reduce((s, r) => s + (r.ecart ?? 0), 0)
+  
+  // Taux total calculation: (Total Jauge - Total Stock Fermeture) / Total Stock Fermeture * 100
+  const totalTaux = totalStockFerm > 0 ? (totalEcart / totalStockFerm) * 100 : 0
+
   return (
     <div className="glass-card rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
@@ -79,16 +90,24 @@ export default function EtatsTable({ states }: { states: DailyState[] }) {
               </tr>
             ))}
           </tbody>
+          <tfoot className="bg-zinc-900/50 border-t-2 border-zinc-800">
+            <tr className="font-bold text-white">
+              <td colSpan={2} className="px-4 py-4 text-left">TOTAL RÉSEAU</td>
+              <td className="px-4 py-4 text-right">{totalStockOuvert.toLocaleString('fr-FR')}</td>
+              <td className="px-4 py-4 text-right text-blue-400">{totalVendu.toLocaleString('fr-FR')}</td>
+              <td className="px-4 py-4 text-right text-emerald-400">{totalRec.toLocaleString('fr-FR')}</td>
+              <td className="px-4 py-4 text-right">{totalStockFerm.toLocaleString('fr-FR')}</td>
+              <td className="px-4 py-4 text-right text-amber-400">{totalJauge.toLocaleString('fr-FR')}</td>
+              <td className={`px-4 py-4 text-right ${totalEcart < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                {totalEcart.toFixed(2)}
+              </td>
+              <td className={`px-4 py-4 text-right ${Math.abs(totalTaux) > 0.5 ? 'text-amber-400' : 'text-zinc-400'}`}>
+                {totalTaux.toFixed(2)}%
+              </td>
+              <td className="px-4 py-4"></td>
+            </tr>
+          </tfoot>
         </table>
-      </div>
-
-      <div className="px-4 py-3 border-t border-zinc-800 flex justify-between text-xs text-zinc-600">
-        <span>{states.length} enregistrement(s)</span>
-        <span>
-          Total vendu: <strong className="text-zinc-400">
-            {states.reduce((s, r) => s + r.volumeVendu, 0).toLocaleString('fr-FR')} L
-          </strong>
-        </span>
       </div>
     </div>
   )
