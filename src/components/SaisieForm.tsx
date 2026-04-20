@@ -147,22 +147,24 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
         <h2 className="font-semibold text-white mb-4">Valeurs à saisir</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Stock ouverture — always readonly (auto-computed) */}
-          <FormField label="Stock d'ouverture (L)" hint={loadingJauge ? 'Chargement...' : 'Hérité de la jauge de la veille'}>
-            <div className="relative">
-              {loadingJauge && (
-                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 animate-spin" />
-              )}
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                value={stockOuverture}
-                onChange={(e) => setStockOuverture(parseFloat(e.target.value) || 0)}
-                readOnly={isManager}
-                className={isManager ? `${readonlyCls} border-blue-500/10` : 'input-field bg-blue-500/5 border-blue-500/20'}
-              />
-            </div>
-          </FormField>
+          {!isManager && (
+            <FormField label="Stock d'ouverture (L)" hint={loadingJauge ? 'Chargement...' : 'Hérité de la jauge de la veille'}>
+              <div className="relative">
+                {loadingJauge && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 animate-spin" />
+                )}
+                <input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={stockOuverture}
+                  onChange={(e) => setStockOuverture(parseFloat(e.target.value) || 0)}
+                  readOnly={isManager}
+                  className={isManager ? `${readonlyCls} border-blue-500/10` : 'input-field bg-blue-500/5 border-blue-500/20'}
+                />
+              </div>
+            </FormField>
+          )}
 
           {/* Volume vendu — editable for everyone including managers */}
           <FormField label="Volume Vendu de la veille (L)" hint="Saisie manuelle obligatoire">
@@ -217,26 +219,28 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
       </div>
 
       {/* Auto-calculated Results */}
-      <div className="glass-card rounded-2xl p-6">
-        <h2 className="font-semibold text-white mb-4">Résultats calculés automatiquement</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <ResultCard label="Stock de fermeture" value={`${stockFermeture.toFixed(2)} L`} color="blue" />
-          <ResultCard label="Écart" value={`${ecart.toFixed(2)} L`} color={ecart < 0 ? 'red' : 'emerald'} />
-          <ResultCard label="Taux d'écart" value={`${tauxEcart.toFixed(2)}%`} color={flagAnomalie ? 'amber' : 'emerald'} />
-          <ResultCard
-            label="Statut"
-            value={flagAnomalie ? 'Anomalie' : 'Normal'}
-            color={flagAnomalie ? 'amber' : 'emerald'}
-            icon={flagAnomalie ? <AlertTriangle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
-          />
-        </div>
-        {flagAnomalie && (
-          <div className="mt-4 flex items-start gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-sm text-amber-300">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <p>L'écart dépasse 0.5% du stock théorique. Un commentaire dans "Observations" est recommandé.</p>
+      {!isManager && (
+        <div className="glass-card rounded-2xl p-6">
+          <h2 className="font-semibold text-white mb-4">Résultats calculés automatiquement</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <ResultCard label="Stock de fermeture" value={`${stockFermeture.toFixed(2)} L`} color="blue" />
+            <ResultCard label="Écart" value={`${ecart.toFixed(2)} L`} color={ecart < 0 ? 'red' : 'emerald'} />
+            <ResultCard label="Taux d'écart" value={`${tauxEcart.toFixed(2)}%`} color={flagAnomalie ? 'amber' : 'emerald'} />
+            <ResultCard
+              label="Statut"
+              value={flagAnomalie ? 'Anomalie' : 'Normal'}
+              color={flagAnomalie ? 'amber' : 'emerald'}
+              icon={flagAnomalie ? <AlertTriangle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+            />
           </div>
-        )}
-      </div>
+          {flagAnomalie && (
+            <div className="mt-4 flex items-start gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-sm text-amber-300">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <p>L'écart dépasse 0.5% du stock théorique. Un commentaire dans "Observations" est recommandé.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Submit */}
       <div className="flex items-center gap-4">

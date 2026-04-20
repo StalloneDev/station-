@@ -10,10 +10,10 @@ import {
 import { logout } from '@/lib/auth'
 
 const navItems = [
-  { href: '/', label: 'Tableau de bord', icon: LayoutDashboard },
+  { href: '/', label: 'Tableau de bord', icon: LayoutDashboard, adminOnly: true },
   { href: '/saisie', label: 'Saisie journalière', icon: PlusCircle },
-  { href: '/etats', label: 'États journaliers', icon: ClipboardList },
-  { href: '/historique', label: 'Historique', icon: History },
+  { href: '/etats', label: 'États journaliers', icon: ClipboardList, adminOnly: true },
+  { href: '/historique', label: 'Historique', icon: History, adminOnly: true },
   { href: '/analyse', label: 'Analyse', icon: BarChart3, adminOnly: true },
   { href: '/parametres', label: 'Paramètres', icon: Settings, adminOnly: true },
 ]
