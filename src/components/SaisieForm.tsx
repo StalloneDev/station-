@@ -126,18 +126,15 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
             </div>
           </FormField>
           <FormField label="Produit">
-            <div className="relative">
-              <Fuel className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
-              <select
-                value={productId}
-                onChange={(e) => setProductId(e.target.value)}
-                className="input-field pl-10"
-              >
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={productId}
+              onChange={(e) => setProductId(e.target.value)}
+              className="input-field"
+            >
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
           </FormField>
         </div>
       </div>

@@ -1,34 +1,68 @@
 const xlsx = require('xlsx');
-const path = require('path');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-function parseDateFromSheetName(name) {
-  // Try to find the last occurrence of DD.MM.YY
+// Stations autorisées - seules celles-ci seront importées
+const ALLOWED_STATIONS = new Set([
+  'MRS AKPAKPA/JENN SERVICE',
+  'MRS FIDJROSSE/JENN SERVICE',
+  'CORLAY FIDJROSSE/IMPERIAL GROUP',
+  'MRS STE RITA/ ISHOLA SERVICES ET FILS',
+  'CORLAY VEDOKO/ GESTION DIRECTE',
+  'CORLAY GODOMEY/AGICOP',
+  'MRS COCOTOMEY/ JENN SERVICES',
+  'MRS PARAKOU 1/ JENN SERVICE',
+  'MRS CALAVI KPOTA/ JENN SERVICE',
+  'MRS TANGUIETA/ ISHOLA SERVICE',
+  'MRS OUIDAH/ GD',
+  'MRS PARAKOU2/ KASAANF SARL',
+  'CORLAY ARCONVILLE/SITRAC',
+  'MRS DASSA/ ISHOLA SERVICE'
+]);
+
+/**
+ * Parse all dates from a sheet name.
+ * "DU 01.04.26"               -> [2026-04-01]
+ * "DU 03.04.26 AU 06.04.26"   -> [2026-04-03, ..., 2026-04-06]  (inclusive range)
+ */
+function parseDatesFromSheetName(name) {
   const regex = /(\d{2})\.(\d{2})\.(\d{2})/g;
+  const dates = [];
   let match;
-  let lastMatch;
   while ((match = regex.exec(name)) !== null) {
-    lastMatch = match;
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1;
+    const year = 2000 + parseInt(match[3], 10);
+    dates.push(new Date(year, month, day, 12, 0, 0));
   }
-  if (!lastMatch) return null;
-  // Year is 20xx
-  const day = parseInt(lastMatch[1], 10);
-  const month = parseInt(lastMatch[2], 10) - 1; // 0-indexed in JS
-  const year = 2000 + parseInt(lastMatch[3], 10);
-  return new Date(year, month, day, 12, 0, 0); // Noon to avoid timezone shifts
+  if (dates.length === 0) return [];
+  if (dates.length === 1) return [dates[0]];
+
+  // Range: expand all days between first and last date
+  const [start, end] = [dates[0], dates[dates.length - 1]];
+  const range = [];
+  const cursor = new Date(start);
+  while (cursor <= end) {
+    range.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return range;
 }
 
 async function main() {
-  const filePath = 'C:\\Users\\skoukpelou\\Downloads\\My Stations\\data\\Copie de ETAT PB AVRIL 2026.xlsx';
+  const filePath = 'C:\\Users\\skoukpelou\\Downloads\\My Stations\\data\\ETAT PB AVRIL 2026.xlsx';
+  
   let workbook;
   try {
     workbook = xlsx.readFile(filePath);
   } catch (err) {
-    console.error("Could not read Excel file:", err.message);
+    console.error('❌ Could not read Excel file:', err.message);
     process.exit(1);
   }
+
+  console.log(`📂 Fichier lu : ${filePath}`);
+  console.log(`📋 Feuilles trouvées : ${workbook.SheetNames.join(', ')}\n`);
 
   // Ensure products exist
   const essence = await prisma.product.upsert({
@@ -44,108 +78,117 @@ async function main() {
 
   const productIdMap = {
     'Essence': essence.id,
-    'Essence ': essence.id,
     'Gasoil': gasoil.id,
-    'Gasoil ': gasoil.id,
   };
 
   let totalImported = 0;
+  let totalSkipped = 0;
 
   for (const sheetName of workbook.SheetNames) {
-    const sheetDate = parseDateFromSheetName(sheetName);
-    if (!sheetDate) {
-      console.log(`Skipping sheet "${sheetName}" (could not parse date)`);
+    const dates = parseDatesFromSheetName(sheetName);
+    if (dates.length === 0) {
+      console.log(`⏭️  Feuille ignorée : "${sheetName}" (pas de date parsable)`);
       continue;
     }
 
-    console.log(`\nImporting sheet: "${sheetName}" -> Date: ${sheetDate.toISOString().split('T')[0]}`);
+    const dateStr = dates.map(d => d.toISOString().split('T')[0]).join(' → ');
+    console.log(`\n📅 Feuille : "${sheetName}" → Dates : ${dateStr}`);
+
     const sheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
+    // Find station blocks  
+    const stationBlocks = [];
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       if (!row || !row[0]) continue;
+      const secondCol = row[1] ? String(row[1]).trim() : '';
+      if (['Volume vendu', 'Ventes', 'Stock Ouv', 'Volume'].includes(secondCol)) {
+        stationBlocks.push(i);
+      }
+    }
 
-      const title = String(row[1]).trim();
-      if (title === 'Volume vendu' || title === 'Ventes') {
-        // Row i is header
-        const stationName = String(row[0]).trim();
-        
-        // Ensure station exists
-        const station = await prisma.station.upsert({
-          where: { name: stationName },
-          update: {},
-          create: { name: stationName }
-        });
+    for (const headerIdx of stationBlocks) {
+      const stationName = String(data[headerIdx][0]).trim();
+      
+      if (!ALLOWED_STATIONS.has(stationName)) {
+        console.log(`   ⚠️  Station non reconnue, ignorée : "${stationName}"`);
+        totalSkipped++;
+        continue;
+      }
 
-        // Parse product rows
-        for (let offset = 1; offset <= 2; offset++) {
-          const prodRow = data[i + offset];
-          if (!prodRow || !prodRow[0]) continue;
-          
-          const rawProductName = String(prodRow[0]).trim();
-          const productId = productIdMap[rawProductName] || productIdMap[rawProductName + ' '];
-          
-          if (!productId) {
-            continue; // Not a known product
-          }
+      // Ensure station exists in DB
+      const station = await prisma.station.upsert({
+        where: { name: stationName },
+        update: {},
+        create: { name: stationName }
+      });
 
-          const ventes = parseFloat(prodRow[1]) || 0;
-          const stockOuv = parseFloat(prodRow[2]) || 0;
-          const reception = parseFloat(prodRow[3]) || 0;
-          const jauge = parseFloat(prodRow[5]);
+      // Process up to 2 product rows after the header
+      for (let offset = 1; offset <= 2; offset++) {
+        const prodRow = data[headerIdx + offset];
+        if (!prodRow || !prodRow[0]) continue;
 
-          const stockFerm = stockOuv + reception - ventes;
-          const ecart = !isNaN(jauge) ? jauge - stockFerm : 0;
-          const tauxEcart = stockFerm > 0 ? (ecart / stockFerm) * 100 : 0;
-          const flagAnomalie = Math.abs(tauxEcart) > 2;
+        const rawProductName = String(prodRow[0]).trim();
+        const productId = productIdMap[rawProductName];
+        if (!productId) continue;
 
+        const volumeVendu = parseFloat(prodRow[1]) || 0;
+        const stockOuverture = parseFloat(prodRow[2]) || 0;
+        const reception = isNaN(parseFloat(prodRow[3])) ? 0 : parseFloat(prodRow[3]);
+        const jaugeRaw = parseFloat(prodRow[5]);
+        const jaugeDuJour = isNaN(jaugeRaw) ? null : jaugeRaw;
+
+        const stockFerm = stockOuverture + reception - volumeVendu;
+        const ecart = jaugeDuJour !== null ? jaugeDuJour - stockFerm : null;
+        const tauxEcart = ecart !== null && stockFerm > 0 ? (ecart / stockFerm) * 100 : null;
+        const flagAnomalie = tauxEcart !== null && Math.abs(tauxEcart) > 0.5;
+
+        // Import for each date in the sheet range
+        for (const date of dates) {
           await prisma.dailyState.upsert({
             where: {
-              date_stationId_productId: {
-                date: sheetDate,
-                stationId: station.id,
-                productId,
-              }
+              date_stationId_productId: { date, stationId: station.id, productId }
             },
             update: {
-              stockOuverture: stockOuv,
-              volumeVendu: ventes,
-              reception: reception,
+              stockOuverture,
+              volumeVendu,
+              reception,
               stockTheoriqueFermeture: stockFerm,
-              jaugeDuJour: !isNaN(jauge) ? jauge : null,
-              ecart: !isNaN(jauge) ? ecart : null,
-              tauxEcart: !isNaN(jauge) ? tauxEcart : null,
+              jaugeDuJour,
+              ecart,
+              tauxEcart,
               flagAnomalie,
               etatValidation: 'valide'
             },
             create: {
-              date: sheetDate,
+              date,
               stationId: station.id,
               productId,
-              stockOuverture: stockOuv,
-              volumeVendu: ventes,
-              reception: reception,
+              stockOuverture,
+              volumeVendu,
+              reception,
               stockTheoriqueFermeture: stockFerm,
-              jaugeDuJour: !isNaN(jauge) ? jauge : null,
-              ecart: !isNaN(jauge) ? ecart : null,
-              tauxEcart: !isNaN(jauge) ? tauxEcart : null,
+              jaugeDuJour,
+              ecart,
+              tauxEcart,
               flagAnomalie,
               etatValidation: 'valide'
             }
           });
           totalImported++;
+          console.log(`   ✅ ${stationName} | ${rawProductName} | ${date.toISOString().split('T')[0]} | Vol:${volumeVendu} Rec:${reception} Jauge:${jaugeDuJour ?? '—'} Écart:${ecart?.toFixed(2) ?? '—'}`);
         }
       }
     }
   }
 
-  console.log(`\n✅ Import completed successfully. imported ${totalImported} daily state records.`);
+  console.log(`\n🎉 Import terminé : ${totalImported} enregistrement(s) importé(s), ${totalSkipped} station(s) ignorée(s).`);
 }
 
 main()
   .catch(e => {
-    console.error("Fatal error during import:", e);
+    console.error('❌ Erreur fatale :', e);
     process.exit(1);
   })
   .finally(async () => {
