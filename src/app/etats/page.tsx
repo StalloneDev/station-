@@ -2,6 +2,7 @@ import { getDailyStatesRange, getStations } from '@/lib/actions'
 import EtatsTable from '@/components/EtatsTable'
 import ExportButton from '@/components/ExportButton'
 import EtatsFilters from '@/components/EtatsFilters'
+import ImportButton from '@/components/ImportButton'
 
 interface Props {
   searchParams: Promise<{ date?: string; endDate?: string; stationId?: string }>
@@ -27,6 +28,7 @@ export default async function EtatsPage({ searchParams }: Props) {
           <p className="text-zinc-400 mt-1">Consultez et filtrez les états de ventes par période</p>
         </div>
         <div className="flex items-center gap-3">
+          <ImportButton />
           <ExportButton startDate={date} endDate={endDate} stationId={stationId} />
         </div>
       </div>
