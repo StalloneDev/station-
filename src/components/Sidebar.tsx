@@ -5,13 +5,15 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, ClipboardList, PlusCircle,
-  History, Settings, Fuel, BarChart3, X, Menu, LogOut
+  History, Settings, Fuel, BarChart3, X, Menu, LogOut,
+  Package
 } from 'lucide-react'
 import { logout } from '@/lib/auth'
 
 const navItems = [
   { href: '/', label: 'Tableau de bord', icon: LayoutDashboard, adminOnly: true },
   { href: '/saisie', label: 'Saisie journalière', icon: PlusCircle },
+  { href: '/stock', label: 'Gestion des Stocks', icon: Package, adminOnly: true },
   { href: '/etats', label: 'États journaliers', icon: ClipboardList, adminOnly: true },
   { href: '/historique', label: 'Historique', icon: History, adminOnly: true },
   { href: '/analyse', label: 'Analyse', icon: BarChart3, adminOnly: true },

@@ -46,6 +46,7 @@ export default function EtatsTable({ states }: { states: DailyState[] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-zinc-800 text-zinc-400">
+              <th className="px-4 py-3 text-left font-medium">Date</th>
               <th className="px-4 py-3 text-left font-medium">Station</th>
               <th className="px-4 py-3 text-left font-medium">Produit</th>
               <th className="px-4 py-3 text-right font-medium">Stk. Ouv.</th>
@@ -61,6 +62,9 @@ export default function EtatsTable({ states }: { states: DailyState[] }) {
           <tbody className="divide-y divide-zinc-800/50">
             {states.map((s) => (
               <tr key={s.id} className={`hover:bg-zinc-800/30 transition-colors ${s.flagAnomalie ? 'bg-amber-500/5' : ''}`}>
+                <td className="px-4 py-3 text-zinc-400">
+                  {new Date(s.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                </td>
                 <td className="px-4 py-3 text-white font-medium max-w-[140px] truncate">{s.station.name}</td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${s.product.name === 'Essence' ? 'bg-sky-500/20 text-sky-300' : 'bg-orange-500/20 text-orange-300'}`}>
@@ -92,7 +96,7 @@ export default function EtatsTable({ states }: { states: DailyState[] }) {
           </tbody>
           <tfoot className="bg-zinc-900/50 border-t-2 border-zinc-800">
             <tr className="font-bold text-white">
-              <td colSpan={2} className="px-4 py-4 text-left">TOTAL RÉSEAU</td>
+              <td colSpan={3} className="px-4 py-4 text-left">TOTAL RÉSEAU</td>
               <td className="px-4 py-4 text-right">{totalStockOuvert.toLocaleString('fr-FR')}</td>
               <td className="px-4 py-4 text-right text-blue-400">{totalVendu.toLocaleString('fr-FR')}</td>
               <td className="px-4 py-4 text-right text-emerald-400">{totalRec.toLocaleString('fr-FR')}</td>

@@ -70,7 +70,7 @@ export async function getDailyStatesForDate(date: string, stationId?: string) {
       ...(stationId ? { stationId } : {}),
     },
     include: { station: true, product: true },
-    orderBy: [{ station: { name: 'asc' } }, { product: { name: 'asc' } }],
+    orderBy: [{ station: { name: 'asc' } }, { date: 'asc' }, { product: { name: 'asc' } }],
   })
 }
 
@@ -86,7 +86,7 @@ export async function getDailyStatesRange(startDate: string, endDate: string, st
       ...(stationId ? { stationId } : {}),
     },
     include: { station: true, product: true },
-    orderBy: [{ station: { name: 'asc' } }, { product: { name: 'asc' } }],
+    orderBy: [{ station: { name: 'asc' } }, { date: 'asc' }, { product: { name: 'asc' } }],
   })
 }
 
@@ -174,6 +174,49 @@ export async function saveDailyState(data: {
   revalidatePath('/')
   revalidatePath('/etats')
   revalidatePath('/saisie')
+  revalidatePath('/stock')
+}
+
+export async function getLatestStocks() {
+  const stations = await prisma.station.findMany({
+    orderBy: { name: 'asc' },
+  })
+
+  const products = await prisma.product.findMany({
+    orderBy: { name: 'asc' },
+  })
+
+  // For each station and product, find the most recent validated entry
+  const data = await Promise.all(stations.map(async (station) => {
+    const productsData = await Promise.all(products.map(async (product) => {
+      const latest = await prisma.dailyState.findFirst({
+        where: {
+          stationId: station.id,
+          productId: product.id,
+          etatValidation: 'valide'
+        },
+        orderBy: { date: 'desc' },
+        include: { product: true }
+      })
+
+      return {
+        product: product.name,
+        latestDate: latest?.date ?? null,
+        stockOuverture: latest?.stockOuverture ?? 0,
+        stockCalculé: latest?.stockTheoriqueFermeture ?? 0,
+        jaugeDernière: latest?.jaugeDuJour ?? null,
+        status: latest ? (new Date().getTime() - new Date(latest.date).getTime() < 86400000 * 2 ? 'à jour' : 'en retard') : 'aucune donnée'
+      }
+    }))
+
+    return {
+      stationName: station.name,
+      stationId: station.id,
+      products: productsData
+    }
+  }))
+
+  return data
 }
 
 // ─── DASHBOARD ANALYTICS ───────────────────────────────────────────────────
@@ -280,7 +323,7 @@ export async function getStatesForExport(startDate: string, endDate: string, sta
       ...(stationId ? { stationId } : {}),
     },
     include: { station: true, product: true },
-    orderBy: [{ date: 'asc' }, { station: { name: 'asc' } }, { product: { name: 'asc' } }],
+    orderBy: [{ station: { name: 'asc' } }, { date: 'asc' }, { product: { name: 'asc' } }],
   })
 }
 
