@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { saveDailyState, getPreviousDayJauge } from '@/lib/actions'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -39,6 +40,7 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
   const [reception, setReception] = useState<number>(0)
   const [jaugeDuJour, setJaugeDuJour] = useState<number>(0)
   const [observation, setObservation] = useState('')
+  const router = useRouter()
   const [loadingJauge, setLoadingJauge] = useState(false)
   const [saved, setSaved] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -74,7 +76,11 @@ export default function SaisieForm({ stations, products, initialStationId, onBac
         observation,
       })
       setSaved(true)
-      setTimeout(() => setSaved(false), 4000)
+      
+      // Delay redirection for 2 seconds to let the user see the success message
+      setTimeout(() => {
+        window.location.href = '/saisie'
+      }, 2000)
     })
   }
 
